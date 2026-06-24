@@ -27,3 +27,53 @@
  *    I believe in...
  *    You - 2026-06-09
  *  *******************************************************/
+
+import User from "./class.user.js";
+import Post from "./class.post.js";
+
+const app = document.querySelector("#app");
+
+async function fetchUsers() {
+    const response = await fetch("https://jsonplaceholder.typicode.com/users");
+    const users = await response.json();
+
+    return users.map((user) => new User(user));
+}
+
+async function fetchPosts() {
+    const response = await fetch("https://jsonplaceholder.typicode.com/posts");
+    const posts = await response.json();
+
+    return posts.map((post) => ({
+        userId: post.userId,
+        post: new Post(post),
+    }));
+}
+
+function assignPostsToUsers(users, posts) {
+    posts.forEach(({ userId, post }) => {
+        const user = users.find((user) => user.id === userId);
+
+        if (user) {
+            user.addPost(post);
+        }
+    });
+}
+
+function renderUsers(users) {
+    app.innerHTML = "";
+
+    users.forEach((user) => {
+        app.append(user.render());
+    });
+}
+
+async function init() {
+    const users = await fetchUsers();
+    const posts = await fetchPosts();
+
+    assignPostsToUsers(users, posts);
+    renderUsers(users);
+}
+
+init();
